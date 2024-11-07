@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Pemesanan Tiket dengan Tab Pembayaran</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <style>
+        body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.form-container, #paymentTab {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 400px;
+}
+
+h2, h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2563eb;
+}
+
+#message {
+    margin-top: 15px;
+    color: #10b981;
+    text-align: center;
+}
+
+.qris-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.qris-image {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* Loading Screen Styles */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #3b82f6;
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.hidden {
+    display: none;
+}
+        /* Semua CSS yang sudah dibuat sebelumnya */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #3b82f6;
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.hidden {
+    display: none;
+}
+/* Tambahkan CSS yang sama seperti sebelumnya */
+.hidden {
+    display: none;
+}
+
+#successMessage {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 255, 0, 0.904);
+    text-align: center;
+}
+
+    </style>
+    <div class="form-container">
+        <h2>Form Pemesanan Tiket</h2>
+        <form id="ticketForm">
+            <div class="input-group">
+                <label for="name">Nama Lengkap:</label>
+                <input type="text" id="name" name="name" placeholder="Masukkan nama lengkap" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Masukkan email" required>
+            </div>
+            <div class="input-group">
+                <label for="ktp">Nomor KTP (16 angka):</label>
+                <input type="text" id="ktp" name="ktp" placeholder="Masukkan nomor KTP" pattern="\d{16}" required>
+            </div>
+            <div class="input-group">
+                <label for="hp">Nomor hp:</label>
+                <input type="text" id="hp" name="hp" placeholder="Masukkan nomor hp"required>
+            </div>
+            <button type="submit">Pesan Tiket</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <!-- Tab Pembayaran -->
+    <div id="paymentTab" class="hidden">
+        <h3>Pembayaran dengan QRIS</h3>
+        <p>Silakan scan QRIS berikut untuk melanjutkan pembayaran, dan klik selesai jika sudah melakukan pembayaran (javatrain tidak akan mengkonfirmasi jika anda belum melakukan pebayaran):</p>
+        <div class="qris-container">
+            <img src="https://ypp.co.id/site/uploads/qris/5f7c6da47a380-qr-code-dana.jpg" alt="QRIS Barcode" class="qris-image">
+        </div>
+        <h3>Rp 120.000</h3>
+        <p id="countdownText">Waktu tersisa: <span id="countdownTimer">--</span> detik</p>
+        <button id="confirmPayment">Pembayaran Selesai</button>
+    </div>
+    <!-- Pesanan Berhasil -->
+    <div id="successMessage" class="hidden">
+        <h3>Pesanan Berhasil!</h3>
+        <p>Terima kasih telah melakukan pembayaran. Tiket Anda telah dipesan. tunggu konfirmasi dari javatrain</p>
+        <button onclick="window.location.href='Atha.html'">Menu</button>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="overlay hidden">
+        <div class="loading"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+       document.getElementById('ticketForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Mencegah submit form secara default
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const ktp = document.getElementById('ktp').value.trim();
+    const hp = document.getElementById('hp').value.trim();
+
+    if (name && email && ktp.match(/^\d{16}$/)) {
+        document.getElementById('message').innerText = '';
+
+        // Tampilkan loading screen sebelum berpindah layer
+        const loadingScreen = document.getElementById('loadingScreen');
+        loadingScreen.classList.remove('hidden');
+
+        setTimeout(() => {
+            document.querySelector('.form-container').classList.add('hidden');
+            document.getElementById('paymentTab').classList.remove('hidden');
+            loadingScreen.classList.add('hidden');
+
+            // Mulai hitung mundur setelah layer pembayaran ditampilkan
+            startCountdown(120); // Hitung mundur 120 detik
+        }, 2000); // Simulasi waktu loading 2 detik
+    } else {
+        document.getElementById('message').innerText = 'Harap mengisi semua data dengan benar.';
+        document.getElementById('message').style.color = '#ef4444'; // Merah untuk pesan error
+    }
+});
+
+document.getElementById('confirmPayment').addEventListener('click', function() {
+    // Tampilkan loading screen sebelum menampilkan pesan berhasil
+    const loadingScreen = document.getElementById('loadingScreen');
+    loadingScreen.classList.remove('hidden');
+
+    setTimeout(() => {
+        document.getElementById('paymentTab').classList.add('hidden');
+        document.getElementById('successMessage').classList.remove('hidden');
+        loadingScreen.classList.add('hidden');
+    }, 2000); // Simulasi waktu loading 2 detik
+});
+
+function startCountdown(duration) {
+    let timer = duration;
+    const countdownElement = document.getElementById('countdownTimer');
+
+    const interval = setInterval(() => {
+        countdownElement.textContent = timer;
+        timer--;
+
+        if (timer < 0) {
+            clearInterval(interval);
+            alert('Waktu pembayaran telah habis. Silakan ulangi pemesanan.');
+            window.location.href = "Atha.html"; // Refresh halaman untuk memulai ulang
+        }
+    }, 1000); // Update setiap 1 detik
+}
+
+
+    </script>
+</body>
+</html>
